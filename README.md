@@ -47,4 +47,4 @@ Missing test keys while Development Mode is on returns a clear error (no silent 
 
 ## Version
 
-`0.1.0`
+`0.2.0`

@@ -21,7 +21,7 @@ const (
 	extensionName        = "cannon-ext-sms-alert"
 	extensionTitle       = "SMS Alerts"
 	extensionDescription = "Keyword SMS list subscribe/unsubscribe and broadcasts via Twilio, with Cannon admin and authorized-sender conversations."
-	extensionVersion     = "0.1.0"
+	extensionVersion     = "0.2.0"
 	updateURLBase        = "https://github.com/rob121/cannon-ext-sms-alert/releases/download"
 	defaultAdminMenu     = "SMS Alerts"
 	pageSize             = 25
@@ -212,7 +212,12 @@ func (c configStore) Load(section string) (map[string]any, error) {
 	if err := c.app.ensureSchema(db); err != nil {
 		return nil, err
 	}
-	return extension.DBConfigurationStore(db, c.table).Load(section)
+	data, err := extension.DBConfigurationStore(db, c.table).Load(section)
+	if err != nil {
+		return nil, err
+	}
+	// Repair values previously stored as JSON numbers (e.g. from_number_live).
+	return stringifyConfigValues(data), nil
 }
 
 func (c configStore) Save(section string, data map[string]any) error {
@@ -223,7 +228,7 @@ func (c configStore) Save(section string, data map[string]any) error {
 	if err := c.app.ensureSchema(db); err != nil {
 		return err
 	}
-	return extension.DBConfigurationStore(db, c.table).Save(section, data)
+	return extension.DBConfigurationStore(db, c.table).Save(section, stringifyConfigValues(data))
 }
 
 func (app *smsApp) db() (*gorm.DB, error) {
