@@ -1,0 +1,72 @@
+{{if .Error}}<div class="admin-alert admin-alert-danger">{{.Error}}</div>{{end}}
+
+<div class="sms-admin">
+  <div class="sms-admin-toolbar">
+    <div class="admin-page-actions">
+      <a class="btn-admin-outline" href="{{.CancelURL}}" data-turbo-frame="_top"><i class="bi bi-arrow-left"></i> Back</a>
+    </div>
+  </div>
+
+  <div class="admin-data-card">
+    <div class="admin-data-card-header">
+      <div class="admin-data-card-summary-main">
+        <h2 class="admin-data-card-title">{{.Title}}</h2>
+        <p class="admin-data-card-desc">Assign which lists this phone may broadcast to.</p>
+      </div>
+    </div>
+    <form method="post" action="{{.ActionURL}}" class="admin-form" style="padding:1.25rem 1.5rem 1.5rem">
+      {{.CSRFField}}
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="admin-form-label">Name</label>
+          <input class="admin-form-control" name="name" value="{{.Row.Name}}">
+        </div>
+        <div class="col-md-6">
+          <label class="admin-form-label">Phone</label>
+          <input class="admin-form-control" name="phone" value="{{.Row.Phone}}" placeholder="+15551234567" required>
+        </div>
+        <div class="col-md-4">
+          <label class="admin-form-label">Status</label>
+          <select class="admin-form-control" name="status">
+            <option value="active" {{if eq .Row.Status "active"}}selected{{end}}>Active</option>
+            <option value="inactive" {{if eq .Row.Status "inactive"}}selected{{end}}>Inactive</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="admin-form-label">Cannon user ID (optional)</label>
+          <input class="admin-form-control" name="user_id" value="{{if .Row.UserID}}{{.Row.UserID}}{{end}}" placeholder="optional">
+        </div>
+        <div class="col-md-4">
+          <label class="admin-form-check" style="margin-top:1.75rem">
+            <input type="checkbox" name="can_send" value="1" {{if .Row.CanSend}}checked{{end}}> Can send
+          </label>
+        </div>
+        <div class="col-12">
+          <label class="admin-form-label">Allowed lists</label>
+          <div class="row g-2">
+            {{range .Lists}}
+            <div class="col-md-4">
+              <label class="admin-form-check">
+                <input type="checkbox" name="list_id" value="{{.ListID}}" {{if index $.Selected .ListID}}checked{{end}}>
+                {{.Name}} <code class="admin-code">{{.Label}}</code>
+              </label>
+            </div>
+            {{else}}
+            <p class="admin-form-help">Create a list first.</p>
+            {{end}}
+          </div>
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn-admin-primary">Save</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+  .admin-extension-app .sms-admin { display: flex; flex-direction: column; gap: 1.5rem; }
+  .admin-extension-app .sms-admin-toolbar {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem 1rem;
+  }
+</style>

@@ -1,0 +1,77 @@
+{{if .Notice}}<div class="admin-alert admin-alert-success">{{.Notice}}</div>{{end}}
+
+<div class="sms-admin">
+  <div class="sms-admin-toolbar">
+    <div class="admin-page-actions">
+      <a class="btn-admin-outline" href="{{.BasePath}}" data-turbo-frame="_top"><i class="bi bi-arrow-left"></i> Overview</a>
+    </div>
+    {{if .CanManage}}
+    <a class="btn-admin-primary" href="{{.BasePath}}/senders/new" data-turbo-frame="_top"><i class="bi bi-plus-lg"></i> Add Sender</a>
+    {{end}}
+  </div>
+
+  <div class="admin-data-card">
+    <div class="admin-data-card-header">
+      <div class="admin-data-card-summary-main">
+        <h2 class="admin-data-card-title">Authorized Senders</h2>
+        <p class="admin-data-card-desc">Phones that can compose broadcasts via SMS conversation.</p>
+      </div>
+    </div>
+    <div class="admin-table-scroll">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Can send</th>
+            <th>Status</th>
+            <th class="admin-col-actions"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {{range .Rows}}
+          <tr>
+            <td><span class="admin-cell-primary">{{.Name}}</span></td>
+            <td><code class="admin-code">{{.Phone}}</code></td>
+            <td>{{if .CanSend}}Yes{{else}}No{{end}}</td>
+            <td>
+              {{if eq .Status "active"}}
+              <span class="admin-badge admin-badge-active"><span class="admin-badge-dot"></span>Active</span>
+              {{else}}
+              <span class="admin-badge admin-badge-inactive"><span class="admin-badge-dot"></span>{{.Status}}</span>
+              {{end}}
+            </td>
+            <td class="admin-col-actions">
+              <div class="admin-row-actions">
+                <a class="btn-admin-icon" href="{{$.BasePath}}/senders/{{.SenderID}}" data-turbo-frame="_top" title="Edit"><i class="bi bi-pencil"></i></a>
+                {{if $.CanManage}}
+                <form method="post" action="{{$.BasePath}}/senders/{{.SenderID}}/delete" class="admin-inline-form" onsubmit="return confirm('Delete this sender?')">
+                  {{$.CSRFField}}
+                  <button type="submit" class="btn-admin-icon btn-admin-icon-danger" title="Delete"><i class="bi bi-trash"></i></button>
+                </form>
+                {{end}}
+              </div>
+            </td>
+          </tr>
+          {{else}}
+          <tr>
+            <td colspan="5" class="admin-table-empty-cell">
+              <div class="admin-empty-state">
+                <div class="admin-empty-state-title">No senders</div>
+                <p class="admin-empty-state-desc">Add phones that may blast lists via SMS.</p>
+              </div>
+            </td>
+          </tr>
+          {{end}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<style>
+  .admin-extension-app .sms-admin { display: flex; flex-direction: column; gap: 1.5rem; }
+  .admin-extension-app .sms-admin-toolbar {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem 1rem;
+  }
+</style>

@@ -1,0 +1,75 @@
+{{if .Notice}}<div class="admin-alert admin-alert-success">{{.Notice}}</div>{{end}}
+
+<div class="sms-admin">
+  <div class="sms-admin-toolbar">
+    <div class="admin-page-actions">
+      <a class="btn-admin-outline" href="{{.BasePath}}" data-turbo-frame="_top"><i class="bi bi-arrow-left"></i> Overview</a>
+    </div>
+    {{if .CanManage}}
+    <a class="btn-admin-primary" href="{{.BasePath}}/lists/new" data-turbo-frame="_top"><i class="bi bi-plus-lg"></i> Add List</a>
+    {{end}}
+  </div>
+
+  <div class="admin-data-card">
+    <div class="admin-data-card-header">
+      <div class="admin-data-card-summary-main">
+        <h2 class="admin-data-card-title">Lists</h2>
+        <p class="admin-data-card-desc">Subscribers join by texting the keyword (label) to your Twilio number.</p>
+      </div>
+    </div>
+    <div class="admin-table-scroll">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Keyword</th>
+            <th>Subscribers</th>
+            <th class="admin-col-actions"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {{range .Rows}}
+          <tr>
+            <td><span class="admin-cell-primary">{{.Name}}</span></td>
+            <td><code class="admin-code">{{.Label}}</code></td>
+            <td>{{.SubscribersCt}}</td>
+            <td class="admin-col-actions">
+              <div class="admin-row-actions">
+                <a class="btn-admin-icon" href="{{$.BasePath}}/lists/{{.ListID}}/subscribers" data-turbo-frame="_top" title="Subscribers"><i class="bi bi-people"></i></a>
+                <a class="btn-admin-icon" href="{{$.BasePath}}/lists/{{.ListID}}/messages" data-turbo-frame="_top" title="Messages"><i class="bi bi-chat-dots"></i></a>
+                {{if $.CanSend}}
+                <a class="btn-admin-icon" href="{{$.BasePath}}/lists/{{.ListID}}/messages/new" data-turbo-frame="_top" title="Compose"><i class="bi bi-send"></i></a>
+                {{end}}
+                {{if $.CanManage}}
+                <a class="btn-admin-icon" href="{{$.BasePath}}/lists/{{.ListID}}" data-turbo-frame="_top" title="Edit"><i class="bi bi-pencil"></i></a>
+                <form method="post" action="{{$.BasePath}}/lists/{{.ListID}}/delete" class="admin-inline-form" onsubmit="return confirm('Delete this list and its subscribers?')">
+                  {{$.CSRFField}}
+                  <button type="submit" class="btn-admin-icon btn-admin-icon-danger" title="Delete"><i class="bi bi-trash"></i></button>
+                </form>
+                {{end}}
+              </div>
+            </td>
+          </tr>
+          {{else}}
+          <tr>
+            <td colspan="4" class="admin-table-empty-cell">
+              <div class="admin-empty-state">
+                <div class="admin-empty-state-icon"><i class="bi bi-list-ul"></i></div>
+                <div class="admin-empty-state-title">No lists yet</div>
+                <p class="admin-empty-state-desc">Create a list with a unique keyword for SMS subscribe.</p>
+              </div>
+            </td>
+          </tr>
+          {{end}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<style>
+  .admin-extension-app .sms-admin { display: flex; flex-direction: column; gap: 1.5rem; }
+  .admin-extension-app .sms-admin-toolbar {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem 1rem;
+  }
+</style>

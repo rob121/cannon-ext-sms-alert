@@ -1,0 +1,267 @@
+{{if .Notice}}<div class="admin-alert admin-alert-success">{{.Notice}}</div>{{end}}
+{{if .Error}}<div class="admin-alert admin-alert-danger">{{.Error}}</div>{{end}}
+
+<div class="sms-admin">
+  <div class="sms-admin-toolbar">
+    <div class="admin-page-actions">
+      <a class="btn-admin-outline" href="{{.SettingsURL}}" data-turbo-frame="_top"><i class="bi bi-sliders"></i> Twilio Settings</a>
+      <a class="btn-admin-outline" href="{{.BasePath}}/lists" data-turbo-frame="_top"><i class="bi bi-list-ul"></i> Lists</a>
+      <a class="btn-admin-outline" href="{{.BasePath}}/numbers" data-turbo-frame="_top"><i class="bi bi-telephone"></i> Numbers</a>
+      <a class="btn-admin-outline" href="{{.BasePath}}/senders" data-turbo-frame="_top"><i class="bi bi-person-badge"></i> Senders</a>
+    </div>
+    {{if .CanManage}}
+    <a class="btn-admin-outline" href="{{.BasePath}}/lists/new" data-turbo-frame="_top"><i class="bi bi-plus-lg"></i> Add List</a>
+    {{end}}
+  </div>
+
+  {{if .CanSend}}
+  <div class="admin-data-card sms-compose-card">
+    <div class="admin-data-card-header">
+      <div class="admin-data-card-summary-main">
+        <h2 class="admin-data-card-title">Compose broadcast</h2>
+        <p class="admin-data-card-desc">Pick a list and write the SMS to send to its subscribers.</p>
+      </div>
+    </div>
+    <form method="post" action="{{.BasePath}}/compose" class="admin-form sms-compose-form" data-turbo="false">
+      {{.CSRFField}}
+      <div class="sms-compose-row">
+        <div class="sms-compose-field">
+          <label class="admin-form-label" for="sms-compose-list">List</label>
+          <select class="admin-form-control" id="sms-compose-list" name="list_id" required {{if not .Lists}}disabled{{end}}>
+            <option value="">Select a list…</option>
+            {{range .Lists}}
+            <option value="{{.ListID}}">{{.Name}} ({{.Label}}) · {{.SubscribersCt}} subscribers</option>
+            {{end}}
+          </select>
+        </div>
+        <div class="sms-compose-actions">
+          <button type="submit" class="btn-admin-primary" {{if not .Lists}}disabled{{end}}>
+            <i class="bi bi-send"></i> Compose
+          </button>
+        </div>
+      </div>
+      {{if not .Lists}}
+      <p class="admin-form-help mb-0">Create a list first, then come back to compose.</p>
+      {{end}}
+    </form>
+  </div>
+  {{end}}
+
+  <div class="admin-stats sms-admin-stats">
+    <div class="admin-stat-card">
+      <a class="admin-stat-card-link-overlay" href="{{.BasePath}}/lists" data-turbo-frame="_top" aria-label="View lists"></a>
+      <div class="admin-stat-card-top">
+        <span class="admin-stat-label">Lists</span>
+        <span class="admin-stat-icon" aria-hidden="true"><i class="bi bi-list-ul"></i></span>
+      </div>
+      <div class="admin-stat-value">{{.ListTotal}}</div>
+    </div>
+    <div class="admin-stat-card">
+      <div class="admin-stat-card-top">
+        <span class="admin-stat-label">Subscribers</span>
+        <span class="admin-stat-icon" aria-hidden="true"><i class="bi bi-people"></i></span>
+      </div>
+      <div class="admin-stat-value">{{.SubscriberTotal}}</div>
+    </div>
+    <div class="admin-stat-card">
+      <a class="admin-stat-card-link-overlay" href="{{.BasePath}}/numbers" data-turbo-frame="_top" aria-label="View numbers"></a>
+      <div class="admin-stat-card-top">
+        <span class="admin-stat-label">Numbers</span>
+        <span class="admin-stat-icon" aria-hidden="true"><i class="bi bi-telephone"></i></span>
+      </div>
+      <div class="admin-stat-value">{{.NumberTotal}}</div>
+    </div>
+    <div class="admin-stat-card">
+      <a class="admin-stat-card-link-overlay" href="{{.BasePath}}/senders" data-turbo-frame="_top" aria-label="View senders"></a>
+      <div class="admin-stat-card-top">
+        <span class="admin-stat-label">Senders</span>
+        <span class="admin-stat-icon" aria-hidden="true"><i class="bi bi-person-badge"></i></span>
+      </div>
+      <div class="admin-stat-value">{{.SenderTotal}}</div>
+    </div>
+  </div>
+
+  {{if .CanManage}}
+  <div class="admin-data-card">
+    <div class="admin-data-card-header sms-retention-header">
+      <div class="admin-data-card-summary-main">
+        <h2 class="admin-data-card-title">Delivery logs</h2>
+        <p class="admin-data-card-desc">
+          {{if gt .LogRetention 0}}
+          Keeping the newest {{.LogRetention}} broadcast message{{if ne .LogRetention 1}}s{{end}} ({{.MessageTotal}} stored). Older messages and their delivery rows are pruned automatically and after each send.
+          {{else}}
+          Retention cleanup is disabled (keep recent messages = 0). {{.MessageTotal}} message{{if ne .MessageTotal 1}}s{{end}} stored.
+          {{end}}
+          Change this under <a href="{{.SettingsURL}}" data-turbo-frame="_top">Twilio Settings</a>.
+        </p>
+      </div>
+      {{if gt .LogRetention 0}}
+      <form method="post" action="{{.BasePath}}/cleanup-logs" class="admin-inline-form" data-turbo="false">
+        {{.CSRFField}}
+        <button type="submit" class="btn-admin-outline" onclick="return confirm('Prune delivery logs now? Messages beyond the retention limit will be deleted.')">
+          <i class="bi bi-trash3"></i> Cleanup now
+        </button>
+      </form>
+      {{end}}
+    </div>
+  </div>
+  {{end}}
+
+  <div class="admin-data-card">
+    <div class="admin-data-card-header">
+      <div class="admin-data-card-summary-main">
+        <h2 class="admin-data-card-title">Setup checklist</h2>
+        <p class="admin-data-card-desc">Configure Twilio, create a list keyword, then add a Cannon route so inbound SMS can reach this extension.</p>
+      </div>
+    </div>
+    <div class="sms-admin-checklist">
+      <ol class="sms-admin-checklist-list">
+        <li>
+          <span class="sms-admin-step">1</span>
+          <div>
+            <strong>Configure Twilio</strong>
+            <p>Open <a href="{{.SettingsURL}}" data-turbo-frame="_top">Twilio Settings</a> and enter SID, auth token, and default from-number. Use the test pair while Development Mode is on.</p>
+          </div>
+        </li>
+        <li>
+          <span class="sms-admin-step">2</span>
+          <div>
+            <strong>Add a from-number</strong>
+            <p>Under <a href="{{.BasePath}}/numbers" data-turbo-frame="_top">Numbers</a>, add your Twilio number in E.164 (for example <code class="admin-code">+15551234567</code>) and assign it when you create a list.</p>
+          </div>
+        </li>
+        <li>
+          <span class="sms-admin-step">3</span>
+          <div>
+            <strong>Create a list</strong>
+            <p>Add a list with a unique keyword. Subscribers text that keyword to join; reply <code class="admin-code">remove</code> to leave.</p>
+          </div>
+        </li>
+        <li>
+          <span class="sms-admin-step">4</span>
+          <div>
+            <strong>Create the webhook route in Cannon</strong>
+            <p>This path is not mounted automatically. Add a route under <a href="{{.RoutesURL}}" data-turbo-frame="_top">System → Routes</a> (or <a href="{{.NewRouteURL}}" data-turbo-frame="_top">Add Route</a>) with these values:</p>
+            <dl class="sms-route-recipe">
+              <div>
+                <dt>Name</dt>
+                <dd>SMS Alert webhook <span class="sms-route-hint">(any label)</span></dd>
+              </div>
+              <div>
+                <dt>Path</dt>
+                <dd><code class="admin-code">{{.WebhookPath}}</code></dd>
+              </div>
+              <div>
+                <dt>Type</dt>
+                <dd>Extension Endpoint</dd>
+              </div>
+              <div>
+                <dt>Extension</dt>
+                <dd>SMS Alerts</dd>
+              </div>
+              <div>
+                <dt>Endpoint</dt>
+                <dd>Twilio Inbound Webhook</dd>
+              </div>
+            </dl>
+            <p class="sms-route-note">Keep the path under <code class="admin-code">/webhooks/</code> so CSRF is skipped for Twilio’s POST. Until the route exists, the URL returns 404.</p>
+          </div>
+        </li>
+        <li>
+          <span class="sms-admin-step">5</span>
+          <div>
+            <strong>Point Twilio at the route</strong>
+            <p>In the Twilio Console for your number, set the messaging webhook to your public site URL plus <code class="admin-code">{{.WebhookPath}}</code>, method <strong>HTTP POST</strong>.</p>
+            <p class="sms-route-note">A browser GET after the route exists should respond with “POST required”. Signatures are checked with the active auth token (test or live from Development Mode).</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<style>
+  .admin-extension-app .sms-admin { display: flex; flex-direction: column; gap: 1.5rem; }
+  .admin-extension-app .sms-admin-toolbar {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem 1rem;
+  }
+  .admin-extension-app .sms-compose-form { padding: 1rem 1.5rem 1.35rem; }
+  .admin-extension-app .sms-compose-row {
+    display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0.75rem 1rem;
+  }
+  .admin-extension-app .sms-compose-field { flex: 1 1 16rem; min-width: 12rem; }
+  .admin-extension-app .sms-compose-actions { flex: 0 0 auto; padding-bottom: 0.1rem; }
+  .admin-extension-app .sms-compose-form .admin-form-help { margin-top: 0.75rem; }
+  .admin-extension-app .sms-retention-header {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem 1rem;
+  }
+  .admin-extension-app .sms-admin-stats {
+    margin-bottom: 0;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+  @media (min-width: 640px) {
+    .admin-extension-app .sms-admin-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (min-width: 960px) {
+    .admin-extension-app .sms-admin-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  }
+  .admin-extension-app .sms-admin-checklist { padding: 1.25rem 1.5rem 1.5rem; }
+  .admin-extension-app .sms-admin-checklist-list {
+    list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1.35rem;
+  }
+  .admin-extension-app .sms-admin-checklist-list li { display: flex; gap: 1rem; align-items: flex-start; }
+  .admin-extension-app .sms-admin-checklist-list strong {
+    display: block; margin-bottom: 0.25rem; font-size: 0.9375rem; color: var(--admin-foreground);
+  }
+  .admin-extension-app .sms-admin-checklist-list p {
+    margin: 0; font-size: 0.875rem; line-height: 1.55; color: var(--admin-muted-fg);
+  }
+  .admin-extension-app .sms-admin-checklist-list p + p { margin-top: 0.5rem; }
+  .admin-extension-app .sms-admin-step {
+    flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
+    width: 1.75rem; height: 1.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700;
+    color: var(--admin-primary); background: rgba(37, 99, 235, 0.1); border: 1px solid rgba(37, 99, 235, 0.18);
+  }
+  .admin-extension-app .sms-route-recipe {
+    margin: 0.75rem 0 0;
+    padding: 0.75rem 1rem;
+    display: grid;
+    gap: 0.55rem 1rem;
+    border: 1px solid var(--admin-border, rgba(15, 23, 42, 0.1));
+    border-radius: 0.5rem;
+    background: var(--admin-muted, rgba(15, 23, 42, 0.03));
+  }
+  .admin-extension-app .sms-route-recipe > div {
+    display: grid;
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+    gap: 0.75rem;
+    align-items: baseline;
+  }
+  .admin-extension-app .sms-route-recipe dt {
+    margin: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--admin-muted-fg);
+  }
+  .admin-extension-app .sms-route-recipe dd {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--admin-foreground);
+  }
+  .admin-extension-app .sms-route-hint {
+    color: var(--admin-muted-fg);
+    font-weight: 400;
+  }
+  .admin-extension-app .sms-route-note {
+    margin-top: 0.65rem !important;
+    font-size: 0.8125rem !important;
+  }
+  @media (max-width: 520px) {
+    .admin-extension-app .sms-route-recipe > div {
+      grid-template-columns: 1fr;
+      gap: 0.15rem;
+    }
+  }
+</style>

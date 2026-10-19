@@ -1,0 +1,5 @@
+/cannon-ext-sms-alert
+*.exe
+*.test
+*.out
+.DS_Store

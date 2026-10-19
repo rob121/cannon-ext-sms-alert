@@ -1,0 +1,60 @@
+{{if .Notice}}<div class="admin-alert admin-alert-success">{{.Notice}}</div>{{end}}
+
+<div class="sms-admin">
+  <div class="sms-admin-toolbar">
+    <div class="admin-page-actions">
+      <a class="btn-admin-outline" href="{{.BasePath}}/lists" data-turbo-frame="_top"><i class="bi bi-arrow-left"></i> Lists</a>
+      <a class="btn-admin-outline" href="{{.BasePath}}/lists/{{.List.ListID}}/subscribers" data-turbo-frame="_top"><i class="bi bi-people"></i> Subscribers</a>
+    </div>
+    {{if .CanSend}}
+    <a class="btn-admin-primary" href="{{.BasePath}}/lists/{{.List.ListID}}/messages/new" data-turbo-frame="_top"><i class="bi bi-send"></i> Compose</a>
+    {{end}}
+  </div>
+
+  <div class="admin-data-card">
+    <div class="admin-data-card-header">
+      <div class="admin-data-card-summary-main">
+        <h2 class="admin-data-card-title">{{.Title}}</h2>
+        <p class="admin-data-card-desc">Broadcast history for this list.</p>
+      </div>
+    </div>
+    <div class="admin-table-scroll">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Sent</th>
+            <th class="admin-col-actions"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {{range .Rows}}
+          <tr>
+            <td><span class="admin-cell-primary">{{.Title}}</span></td>
+            <td>{{.CreatedAt.Format "2006-01-02 15:04"}}</td>
+            <td class="admin-col-actions">
+              <a class="btn-admin-icon" href="{{$.BasePath}}/lists/{{$.List.ListID}}/messages/{{.MessageID}}" data-turbo-frame="_top" title="Delivery log"><i class="bi bi-journal-text"></i></a>
+            </td>
+          </tr>
+          {{else}}
+          <tr>
+            <td colspan="3" class="admin-table-empty-cell">
+              <div class="admin-empty-state">
+                <div class="admin-empty-state-title">No messages yet</div>
+                <p class="admin-empty-state-desc">Compose a broadcast or send via an authorized sender phone.</p>
+              </div>
+            </td>
+          </tr>
+          {{end}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<style>
+  .admin-extension-app .sms-admin { display: flex; flex-direction: column; gap: 1.5rem; }
+  .admin-extension-app .sms-admin-toolbar {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem 1rem;
+  }
+</style>

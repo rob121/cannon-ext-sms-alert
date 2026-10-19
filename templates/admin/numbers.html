@@ -1,0 +1,76 @@
+{{if .Notice}}<div class="admin-alert admin-alert-success">{{.Notice}}</div>{{end}}
+
+<div class="sms-admin">
+  <div class="sms-admin-toolbar">
+    <div class="admin-page-actions">
+      <a class="btn-admin-outline" href="{{.BasePath}}" data-turbo-frame="_top"><i class="bi bi-arrow-left"></i> Overview</a>
+    </div>
+    {{if .CanManage}}
+    <a class="btn-admin-primary" href="{{.BasePath}}/numbers/new" data-turbo-frame="_top"><i class="bi bi-plus-lg"></i> Add Number</a>
+    {{end}}
+  </div>
+
+  <div class="admin-data-card">
+    <div class="admin-data-card-header">
+      <div class="admin-data-card-summary-main">
+        <h2 class="admin-data-card-title">From Numbers</h2>
+        <p class="admin-data-card-desc">Twilio numbers used as the From address when broadcasting.</p>
+      </div>
+    </div>
+    <div class="admin-table-scroll">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Label</th>
+            <th>Number</th>
+            <th>Status</th>
+            <th class="admin-col-actions"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {{range .Rows}}
+          <tr>
+            <td><span class="admin-cell-primary">{{.Label}}</span></td>
+            <td><code class="admin-code">{{.Number}}</code></td>
+            <td>
+              {{if .Active}}
+              <span class="admin-badge admin-badge-active"><span class="admin-badge-dot"></span>Active</span>
+              {{else}}
+              <span class="admin-badge admin-badge-inactive"><span class="admin-badge-dot"></span>Inactive</span>
+              {{end}}
+            </td>
+            <td class="admin-col-actions">
+              <div class="admin-row-actions">
+                <a class="btn-admin-icon" href="{{$.BasePath}}/numbers/{{.NumberID}}" data-turbo-frame="_top" title="Edit"><i class="bi bi-pencil"></i></a>
+                {{if $.CanManage}}
+                <form method="post" action="{{$.BasePath}}/numbers/{{.NumberID}}/delete" class="admin-inline-form" onsubmit="return confirm('Delete this number?')">
+                  {{$.CSRFField}}
+                  <button type="submit" class="btn-admin-icon btn-admin-icon-danger" title="Delete"><i class="bi bi-trash"></i></button>
+                </form>
+                {{end}}
+              </div>
+            </td>
+          </tr>
+          {{else}}
+          <tr>
+            <td colspan="4" class="admin-table-empty-cell">
+              <div class="admin-empty-state">
+                <div class="admin-empty-state-icon"><i class="bi bi-telephone"></i></div>
+                <div class="admin-empty-state-title">No numbers yet</div>
+                <p class="admin-empty-state-desc">Add an E.164 Twilio number to assign to lists.</p>
+              </div>
+            </td>
+          </tr>
+          {{end}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<style>
+  .admin-extension-app .sms-admin { display: flex; flex-direction: column; gap: 1.5rem; }
+  .admin-extension-app .sms-admin-toolbar {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem 1rem;
+  }
+</style>
