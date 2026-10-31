@@ -827,14 +827,14 @@ func adminCanManage(req extension.WireRequest) bool {
 	if !userHasPermissions(req) {
 		return true
 	}
-	return extension.UserCan(req, "sms-alert.manage")
+	return extension.UserCan(req, permSMSManage)
 }
 
 func adminCanSend(req extension.WireRequest) bool {
 	if !userHasPermissions(req) {
 		return true
 	}
-	return extension.UserCan(req, "sms-alert.send") || extension.UserCan(req, "sms-alert.manage")
+	return extension.UserCan(req, permSMSSend) || extension.UserCan(req, permSMSManage)
 }
 
 func userHasPermissions(req extension.WireRequest) bool {

@@ -19,9 +19,11 @@ var templateFiles embed.FS
 
 const (
 	extensionName        = "cannon-ext-sms-alert"
+	permSMSManage        = extensionName + ".sms-alert.manage"
+	permSMSSend          = extensionName + ".sms-alert.send"
 	extensionTitle       = "SMS Alerts"
 	extensionDescription = "Keyword SMS list subscribe/unsubscribe and broadcasts via Twilio, with Cannon admin and authorized-sender conversations."
-	extensionVersion     = "0.2.0"
+	extensionVersion     = "0.2.1"
 	updateURLBase        = "https://github.com/rob121/cannon-ext-sms-alert/releases/download"
 	defaultAdminMenu     = "SMS Alerts"
 	pageSize             = 25
